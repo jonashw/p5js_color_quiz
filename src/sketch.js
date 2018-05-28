@@ -39,20 +39,33 @@ function setup() {
   }));
 } 
 
+function touchStarted(){
+  var lastTouch = touches.slice().pop();
+  handlePointAction(createVector(lastTouch.x, lastTouch.y));
+  return false; // This is to prevent pinch-zooming on touch devices.
+}
+
+function mousePressed(){
+  handlePointAction(createVector(mouseX, mouseY));
+}
+
+function handlePointAction(p){
+  let drawables = levels.getCurrent();
+  let activated = drawables.filter(d => d.containsPoint(p))[0];
+  if(activated){
+    bg = activated.color;
+  }
+}
+
 function keyPressed(){
   switch(keyCode){
-    case LEFT_ARROW:  levels.movePrev(); break;
-    case RIGHT_ARROW: levels.moveNext(); break;
+    case LEFT_ARROW:  levels.movePrev(); bg = color(255); break;
+    case RIGHT_ARROW: levels.moveNext(); bg = color(255); break;
     break;
   }
 }
 
 function mouseClicked(){
-  let drawables = levels.getCurrent();
-  let clicked = drawables.filter(d => d.containsPoint(mouseX, mouseY))[0];
-  if(clicked){
-    bg = clicked.color;
-  }
 }
 
 function draw() { 
@@ -76,11 +89,12 @@ function ColoredSubject(color,degreesOffset,img){
   var _inBound = true;
   var _rotation = 0;
   var _ellipseDiameter = 1;
+  var _center = createVector(0,0);
   this.color = color;
-  this.containsPoint = (x,y) => {
+  this.containsPoint = (v) => {
+    return v.dist(_center) <= _ellipseDiameter/2;
+  }
 
-    return false;
-  };
   this.draw = () => {
     push();
     let duration = 100;
@@ -93,8 +107,8 @@ function ColoredSubject(color,degreesOffset,img){
     let x0 = windowWidth / 6;
     let y0 = windowHeight / 6;
     let r = Math.sqrt(x0*x0 + y0*y0);
-    _x = r * cos(_rotation) + centerX;
-    _y = r * sin(_rotation) + centerY;
+    _center.x = r * cos(_rotation) + centerX;
+    _center.y = r * sin(_rotation) + centerY;
     if(frameCount % duration == 0){
       _inBound = !_inBound;
     }
@@ -105,9 +119,9 @@ function ColoredSubject(color,degreesOffset,img){
     _ellipseDiameter = s + (sizeFactor * 40);
     strokeWeight(5);
     fill(color);
-    ellipse(_x, _y, _ellipseDiameter, _ellipseDiameter);
+    ellipse(_center.x, _center.y, _ellipseDiameter, _ellipseDiameter);
     if(img){
-      svgImage(img,_x,_y,s);
+      svgImage(img, _center.x, _center.y, s);
     }
     pop();
   };
