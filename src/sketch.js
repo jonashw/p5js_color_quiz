@@ -16,13 +16,13 @@ function setup() {
     p: color(290,100,40)
   };
   levels = new CircularArray([
+    ['truck-o',     'roygbp'],
     ['car-o',       'rb'],
     ['shoe-o',      'rg'],
     ['hat-o',       'gb'],
     ['bicycle-o',   'ryb'],
     ['sock-o',      'rygb'],
     ['pants-o',     'roygb'],
-    ['truck-o',     'roygbp'],
     ['train-o',     'pog'],
     ['motorcycle-o','prb'],
     ['shirt-o',     'gy'],
@@ -75,9 +75,7 @@ function windowResized() {
 function ColoredSubject(color,degreesOffset,img){
   var _inBound = true;
   var _rotation = 0;
-  var _size = {
-    ellipse: 1
-  };
+  var _ellipseDiameter = 1;
   this.color = color;
   this.containsPoint = (x,y) => {
 
@@ -90,15 +88,13 @@ function ColoredSubject(color,degreesOffset,img){
     rectMode(CENTER);
     imageMode(CENTER);
     _rotation = degreesOffset + (frameCount/10 % 360);
-    let x0 = windowWidth / 5;
-    let y0 = windowHeight / 5;
+    let centerX = windowWidth / 2;
+    let centerY = windowHeight / 2;
+    let x0 = windowWidth / 6;
+    let y0 = windowHeight / 6;
     let r = Math.sqrt(x0*x0 + y0*y0);
-    let x = r * cos(radians(_rotation)) + x0;
-    let y = r * sin(radians(_rotation)) + y0;
-    translate(windowWidth / 2, windowHeight / 2);
-    rotate(-_rotation);
-    translate(x0,y0);
-    rotate(_rotation);
+    _x = r * cos(_rotation) + centerX;
+    _y = r * sin(_rotation) + centerY;
     if(frameCount % duration == 0){
       _inBound = !_inBound;
     }
@@ -106,12 +102,12 @@ function ColoredSubject(color,degreesOffset,img){
 
     let sizeFactor = (windowWidth / 500 );
     let s = sizeFactor * (40 + 10 * Easing.Sinusoidal.InOut(_inBound ? progress : 1 - progress));
-    _size.ellipse = s + (sizeFactor * 40);
+    _ellipseDiameter = s + (sizeFactor * 40);
     strokeWeight(5);
     fill(color);
-    ellipse(0, 0, _size.ellipse, _size.ellipse);
+    ellipse(_x, _y, _ellipseDiameter, _ellipseDiameter);
     if(img){
-      svgImage(img,0,0,s);
+      svgImage(img,_x,_y,s);
     }
     pop();
   };
